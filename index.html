@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Exchange Rates</title>
+    <style>
+      #exchange-container {
+        display: none;
+      }
+    </style>
+    <script>
+      //function to get currency symbol to show in drop down list
+      function getSymbols() {
+        let Select2 = document.getElementById('symbols')
+        let url =
+          'http://api.exchangeratesapi.io/v1/symbols?access_key=b94a96a57b695d0f50c798858ce43caa'
+        var xhr = new XMLHttpRequest()
+        xhr.open('GET', url, true)
+        xhr.onload = function (e) {
+          if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+              let response = JSON.parse(xhr.responseText)
+              const rates = response.symbols
+              for (var i in rates) {
+                var option = document.createElement('option')
+                option.text = i
+                Select2.add(option)
+              }
+            } else {
+              console.error(xhr.statusText)
+            }
+          }
+        }
+        xhr.onerror = function (e) {
+          console.error(xhr.statusText)
+        }
+        xhr.send(null)
+      }
+
+      //function to fetch exchange rates data from the url
+      function getExchangeData(url) {
+        var xhr = new XMLHttpRequest()
+        xhr.open('GET', url, true)
+        xhr.onload = function (e) {
+          if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+              let response = JSON.parse(xhr.responseText)
+              const rates = response.rates
+              for (var i in rates) {
+                document.getElementById('exchange-rate').innerText = rates[i]
+                document.getElementById('exchange-container').style.display =
+                  'block'
+              }
+            } else {
+              console.error(xhr.statusText)
+            }
+          }
+        }
+        xhr.onerror = function (e) {
+          console.error(xhr.statusText)
+        }
+        xhr.send(null)
+      }
+
+
+      //funtion to fetch exchange rates
+      function getExchange() {
+        let key = 'b94a96a57b695d0f50c798858ce43caa'
+        let currentDate = document.getElementById('selectdate').value
+        let symbol = document.getElementById('symbols').value
+        console.log(symbol)
+        if (currentDate && symbol) {
+          document.getElementById('exchange-symbol').innerText = symbol
+          let url =
+            'http://api.exchangeratesapi.io/v1/' +
+            currentDate +
+            '?access_key=' +
+            key +
+            '&base=EUR&symbols=' +
+            symbol
+          //let url='http://api.exchangeratesapi.io/v1/latest?access_key=b94a96a57b695d0f50c798858ce43caa';
+          getExchangeData(url)
+        }
+      }
+      window.onload = getSymbols
+    </script>
+  </head>
+  <body>
+    <div>
+      <label for="symbols">Select Exchange Symbol:</label>
+      <select id="symbols" name="rates"></select>
+    </div>
+    <div>
+      <label for="selectdate">Select date:</label>
+      <input type="date" id="selectdate" name="selectdate" />
+    </div>
+    <button onclick="getExchange()">Exchange</button>
+    <div id="exchange-container">
+      <h1>
+        Exchange Rate Euro to
+        <span id="exchange-symbol"></span>
+      </h1>
+      <h2>
+        Price:
+        <span id="exchange-rate"></span>
+      </h2>
+    </div>
+  </body>
+</html>
